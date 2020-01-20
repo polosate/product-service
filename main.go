@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	// Import the generated protobuf code
-	pb "github.com/polosate/steaks/proto/products"
+	pb "github.com/polosate/steaks/proto/product"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -18,23 +18,23 @@ const (
 )
 
 type repository interface {
-	Create(*pb.Product) (*pb.Consignment, error)
+	Create(*pb.Product) (*pb.Product, error)
 }
 
 // Repository - Dummy repository, this simulates the use of a datastore
 // of some kind. We'll replace this with a real implementation later on.
 type Repository struct {
-	mu           sync.RWMutex
-	consignments []*pb.Consignment
+	mu      sync.RWMutex
+	product []*pb.Product
 }
 
 // Create a new consignment
-func (repo *Repository) Create(consignment *pb.Consignment) (*pb.Consignment, error) {
+func (repo *Repository) Create(product *pb.Product) (*pb.Product, error) {
 	repo.mu.Lock()
-	updated := append(repo.consignments, consignment)
-	repo.consignments = updated
+	updated := append(repo.product, product)
+	repo.product = updated
 	repo.mu.Unlock()
-	return consignment, nil
+	return product, nil
 }
 
 // Service should implement all of the methods to satisfy the service
@@ -48,17 +48,17 @@ type service struct {
 // CreateConsignment - we created just one method on our service,
 // which is a create method, which takes a context and a request as an
 // argument, these are handled by the gRPC server.
-func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment) (*pb.Response, error) {
+func (s *service) CreateProduct(ctx context.Context, req *pb.Product) (*pb.Response, error) {
 
 	// Save our consignment
-	consignment, err := s.repo.Create(req)
+	product, err := s.repo.Create(req)
 	if err != nil {
 		return nil, err
 	}
 
 	// Return matching the `Response` message we created in our
 	// protobuf definition.
-	return &pb.Response{Created: true, Consignment: consignment}, nil
+	return &pb.Response{Created: true, Product: product}, nil
 }
 
 func main() {
@@ -75,7 +75,7 @@ func main() {
 	// Register our service with the gRPC server, this will tie our
 	// implementation into the auto-generated interface code for our
 	// protobuf definition.
-	pb.RegisterShippingServiceServer(s, &service{repo})
+	pb.RegisterProductServiceServer(s, &service{repo})
 
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
