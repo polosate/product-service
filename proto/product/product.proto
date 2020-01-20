@@ -1,0 +1,19 @@
+// steaks/proto/product/product.proto
+syntax = "proto3";
+
+package product;
+
+service ProductService {
+    rpc CreateProduct(Product) returns (Response) {}
+}
+
+message Product {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+message Response {
+    bool created = 1;
+    Product product = 2;
+}
