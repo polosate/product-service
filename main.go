@@ -19,22 +19,28 @@ const (
 
 type repository interface {
 	Create(*pb.Product) (*pb.Product, error)
+	GetAll() []*pb.Product
 }
 
 // Repository - Dummy repository, this simulates the use of a datastore
 // of some kind. We'll replace this with a real implementation later on.
 type Repository struct {
-	mu      sync.RWMutex
-	product []*pb.Product
+	mu       sync.RWMutex
+	products []*pb.Product
 }
 
-// Create a new consignment
+// Create a new products
 func (repo *Repository) Create(product *pb.Product) (*pb.Product, error) {
 	repo.mu.Lock()
-	updated := append(repo.product, product)
-	repo.product = updated
+	updated := append(repo.products, product)
+	repo.products = updated
 	repo.mu.Unlock()
 	return product, nil
+}
+
+// GetAll returns all products
+func (repo *Repository) GetAll() []*pb.Product {
+	return repo.products
 }
 
 // Service should implement all of the methods to satisfy the service
@@ -45,7 +51,7 @@ type service struct {
 	repo repository
 }
 
-// CreateConsignment - we created just one method on our service,
+// CreateProduct - we created just one method on our service,
 // which is a create method, which takes a context and a request as an
 // argument, these are handled by the gRPC server.
 func (s *service) CreateProduct(ctx context.Context, req *pb.Product) (*pb.Response, error) {
@@ -59,6 +65,11 @@ func (s *service) CreateProduct(ctx context.Context, req *pb.Product) (*pb.Respo
 	// Return matching the `Response` message we created in our
 	// protobuf definition.
 	return &pb.Response{Created: true, Product: product}, nil
+}
+
+func (s *service) GetProducts(ctx context.Context, req *pb.GetRequest) (*pb.Response, error) {
+	products := s.repo.GetAll()
+	return &pb.Response{Products: products}, nil
 }
 
 func main() {
