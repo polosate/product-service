@@ -9,10 +9,6 @@ import (
 	pb "github.com/polosate/steaks/proto/product"
 )
 
-const (
-	port = ":50051"
-)
-
 type repository interface {
 	Create(*pb.Product) (*pb.Product, error)
 	GetAll() []*pb.Product
