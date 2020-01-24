@@ -3,14 +3,10 @@ package main
 
 import (
 	"context"
-	"log"
-	"net"
-	"sync"
-
+	"fmt"
+	"github.com/micro/go-micro"
 	// Import the generated protobuf code
 	pb "github.com/polosate/steaks/proto/product"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 const (
@@ -25,16 +21,13 @@ type repository interface {
 // Repository - Dummy repository, this simulates the use of a datastore
 // of some kind. We'll replace this with a real implementation later on.
 type Repository struct {
-	mu       sync.RWMutex
 	products []*pb.Product
 }
 
 // Create a new products
 func (repo *Repository) Create(product *pb.Product) (*pb.Product, error) {
-	repo.mu.Lock()
 	updated := append(repo.products, product)
 	repo.products = updated
-	repo.mu.Unlock()
 	return product, nil
 }
 
@@ -54,45 +47,70 @@ type service struct {
 // CreateProduct - we created just one method on our service,
 // which is a create method, which takes a context and a request as an
 // argument, these are handled by the gRPC server.
-func (s *service) CreateProduct(ctx context.Context, req *pb.Product) (*pb.Response, error) {
+func (s *service) CreateProduct(ctx context.Context, req *pb.Product, res *pb.Response) error {
 
 	// Save our consignment
 	product, err := s.repo.Create(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	// Return matching the `Response` message we created in our
-	// protobuf definition.
-	return &pb.Response{Created: true, Product: product}, nil
+	res.Created = true
+	res.Product = product
+	return nil
 }
 
-func (s *service) GetProducts(ctx context.Context, req *pb.GetRequest) (*pb.Response, error) {
+func (s *service) GetProducts(ctx context.Context, req *pb.GetRequest, res *pb.Response) error {
 	products := s.repo.GetAll()
-	return &pb.Response{Products: products}, nil
+	res.Products = products
+	return nil
 }
 
 func main() {
 
 	repo := &Repository{}
 
-	// Set-up our gRPC server.
-	lis, err := net.Listen("tcp", port)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	s := grpc.NewServer()
+	// Create a new service. Optionally include some options here.
+	srv := micro.NewService(
 
-	// Register our service with the gRPC server, this will tie our
-	// implementation into the auto-generated interface code for our
-	// protobuf definition.
-	pb.RegisterProductServiceServer(s, &service{repo})
+		// This name must match the package name given in your protobuf definition
+		micro.Name("product"),
+	)
 
-	// Register reflection service on gRPC server.
-	reflection.Register(s)
+	// Init will parse the command line flags.
+	srv.Init()
 
-	log.Println("Running on port:", port)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	// Register handler
+	pb.RegisterProductServiceHandler(srv.Server(), &service{repo})
+
+	// Run the server
+	if err := srv.Run(); err != nil {
+		fmt.Println(err)
 	}
 }
+
+
+//func main() {
+//
+//	repo := &Repository{}
+//
+//	// Set-up our gRPC server.
+//	lis, err := net.Listen("tcp", port)
+//	if err != nil {
+//		log.Fatalf("failed to listen: %v", err)
+//	}
+//	s := grpc.NewServer()
+//
+//	// Register our service with the gRPC server, this will tie our
+//	// implementation into the auto-generated interface code for our
+//	// protobuf definition.
+//	pb.RegisterProductServiceServer(s, &service{repo})
+//
+//	// Register reflection service on gRPC server.
+//	reflection.Register(s)
+//
+//	log.Println("Running on port:", port)
+//	if err := s.Serve(lis); err != nil {
+//		log.Fatalf("failed to serve: %v", err)
+//	}
+//}
