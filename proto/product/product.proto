@@ -3,7 +3,7 @@
 // protoc -I. --go_out=plugins=micro:. proto/product/product.proto
 syntax = "proto3";
 
-package product;
+package steaks.product.service;
 
 service ProductService {
     rpc CreateProduct(Product) returns (Response) {}
