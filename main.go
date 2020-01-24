@@ -74,7 +74,7 @@ func main() {
 	srv := micro.NewService(
 
 		// This name must match the package name given in your protobuf definition
-		micro.Name("product"),
+		micro.Name("steaks.service.product"),
 	)
 
 	// Init will parse the command line flags.
@@ -88,29 +88,3 @@ func main() {
 		fmt.Println(err)
 	}
 }
-
-
-//func main() {
-//
-//	repo := &Repository{}
-//
-//	// Set-up our gRPC server.
-//	lis, err := net.Listen("tcp", port)
-//	if err != nil {
-//		log.Fatalf("failed to listen: %v", err)
-//	}
-//	s := grpc.NewServer()
-//
-//	// Register our service with the gRPC server, this will tie our
-//	// implementation into the auto-generated interface code for our
-//	// protobuf definition.
-//	pb.RegisterProductServiceServer(s, &service{repo})
-//
-//	// Register reflection service on gRPC server.
-//	reflection.Register(s)
-//
-//	log.Println("Running on port:", port)
-//	if err := s.Serve(lis); err != nil {
-//		log.Fatalf("failed to serve: %v", err)
-//	}
-//}
