@@ -8,14 +8,16 @@ package steaks.product.service;
 service ProductService {
     rpc CreateProduct(Product) returns (Response) {}
     rpc GetProducts(GetRequest) returns (Response) {}
+//    rpc UpdateProduct(UpdateRequest) returns (UpdateResponse) {}
 }
 
 message GetRequest {}
 
 message Product {
-    string id = 1;
+    int32 id = 1;
     string name = 2;
     string description = 3;
+    int32 storage_id = 4;
 }
 
 message Response {
@@ -23,3 +25,14 @@ message Response {
     Product product = 2;
     repeated Product products = 3;
 }
+//
+//message UpdateRequest {
+//    int32 user_id = 1;
+//    int32 product_id = 2;
+//    int32 amount = 3;
+//}
+//
+//message UpdateResponse {
+//    bool updated = 1;
+//    Product product = 2;
+//}
