@@ -27,15 +27,10 @@ func (repo *Repository) Create(product *pb.Product) (*pb.Product, error) {
 	return product, nil
 }
 
-// GetAll returns all products
 func (repo *Repository) GetAll() []*pb.Product {
 	return repo.products
 }
 
-// Service should implement all of the methods to satisfy the service
-// we defined in our protobuf definition. You can check the interface
-// in the generated code itself for the exact method signatures etc
-// to give you a better idea.
 type service struct {
 	repo repository
 }
