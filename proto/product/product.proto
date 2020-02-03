@@ -1,6 +1,4 @@
 // steaks/proto/product/product.proto
-// protoc -I proto/product/ proto/product/product.proto --go_out=plugins=grpc:proto/product
-// protoc -I. --go_out=plugins=micro:. proto/product/product.proto
 syntax = "proto3";
 
 package steaks.product.service;

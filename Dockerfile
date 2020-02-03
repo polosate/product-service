@@ -11,7 +11,7 @@ ENV GO111MODULE=on
 COPY . .
 
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o steaks-service-product
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o product-service
 
 # Run container
 FROM alpine:latest
@@ -20,6 +20,6 @@ RUN apk --no-cache add ca-certificates
 
 RUN mkdir /app
 WORKDIR /app
-COPY --from=builder /app/steaks-service-product .
+COPY --from=builder /app/product-service .
 
-CMD ["./steaks-service-product"]
+CMD ["./product-service"]

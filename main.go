@@ -4,13 +4,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/micro/go-micro"
 	"log"
 	"sync"
 
-	// Import the generated protobuf code
-	pb "github.com/polosate/steaks/proto/product"
-	storageProto "github.com/polosate/steaks-service-storage/proto/storage"
+	"github.com/micro/go-micro"
+	storageProto "github.com/polosate/storage-service/proto/storage"
+	pb "github.com/polosate/product-service/proto/product"
 )
 
 type repository interface {
@@ -21,7 +20,7 @@ type repository interface {
 // Repository - Dummy repository, this simulates the use of a datastore
 // of some kind. We'll replace this with a real implementation later on.
 type Repository struct {
-	mu sync.RWMutex
+	mu       sync.RWMutex
 	products []*pb.Product
 }
 
@@ -39,7 +38,7 @@ func (repo *Repository) GetAll() []*pb.Product {
 }
 
 type service struct {
-	repo repository
+	repo          repository
 	storageClient storageProto.StorageServiceClient
 }
 
@@ -63,6 +62,7 @@ func (s *service) CreateProduct(ctx context.Context, req *pb.Product, res *pb.Re
 	if err != nil {
 		return err
 	}
+	log.Println(product)
 
 	res.Created = true
 	res.Product = product
@@ -89,7 +89,7 @@ func main() {
 	// Init will parse the command line flags.
 	srv.Init()
 
-	storageClient := storageProto.NewStorageServiceClient("steaks.service.storages", srv.Client())
+	storageClient := storageProto.NewStorageServiceClient("steaks.storage.service", srv.Client())
 
 	// Register handler
 	pb.RegisterProductServiceHandler(srv.Server(), &service{repo, storageClient})
