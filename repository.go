@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	pb "github.com/polosate/product-service/proto/product"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -61,11 +62,11 @@ func (repository *MongoRepository) Create(ctx context.Context, product *Product)
 
 // GetAll -
 func (repository *MongoRepository) GetAll(ctx context.Context) ([]*Product, error) {
-	cur, err := repository.collection.Find(ctx, nil, nil)
+	cur, err := repository.collection.Find(ctx, bson.D{}, nil)
 	var products []*Product
 	for cur.Next(ctx) {
 		var product *Product
-		if err := cur.Decode(&products); err != nil {
+		if err := cur.Decode(&product); err != nil {
 			return nil, err
 		}
 		products = append(products, product)
